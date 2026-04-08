@@ -25,17 +25,22 @@ export default {
         console.log("BODY RECEIVED:", body);
 
         await env.DB.prepare(
-          "INSERT INTO messages (username, group_name, message) VALUES (?, ?, ?)"
+          `INSERT INTO messages 
+           (username, message, group_name) 
+           VALUES (?, ?, ?)`
         )
           .bind(
             body.username,
-            body.group_name,
-            body.message
+            body.message,
+            body.group_name
           )
           .run();
 
         return new Response(
-          JSON.stringify({ success: true }),
+          JSON.stringify({
+            success: true,
+            saved: body
+          }),
           {
             headers: {
               "Content-Type": "application/json",
@@ -45,7 +50,9 @@ export default {
         );
       } catch (error) {
         return new Response(
-          JSON.stringify({ error: error.message }),
+          JSON.stringify({
+            error: error.message
+          }),
           { status: 500 }
         );
       }
