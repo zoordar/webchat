@@ -1,0 +1,12 @@
+name = "chatterbox-backend"
+main = "worker.js"
+compatibility_date = "2026-04-08"
+
+[vars]
+# TODO: Move GEMINI_API_KEY to Wrangler secrets for production
+GEMINI_API_KEY = "AIzaSyA1MKc76dETsAQVcjcunmUW9gxNd8HHRi"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "webchat"
+database_id = "02a25b96-12a9-44c7-a7ff-2731390da053"
