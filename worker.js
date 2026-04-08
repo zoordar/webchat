@@ -20,20 +20,16 @@ export default {
       request.method === "POST"
     ) {
       try {
-        const body = await request.json();
-        console.log(body);
+        const { username, message } = await request.json();
 
         await env.DB.prepare(
           "INSERT INTO messages (username, message) VALUES (?, ?)"
         )
-          .bind(body.username, body.message)
+          .bind(username, message)
           .run();
 
         return new Response(
-          JSON.stringify({
-            success: true,
-            inserted: body
-          }),
+          JSON.stringify({ success: true }),
           {
             headers: {
               "Content-Type": "application/json",
@@ -43,9 +39,7 @@ export default {
         );
       } catch (error) {
         return new Response(
-          JSON.stringify({
-            error: error.message
-          }),
+          JSON.stringify({ error: error.message }),
           { status: 500 }
         );
       }
@@ -56,19 +50,23 @@ export default {
       url.pathname === "/get-messages" &&
       request.method === "GET"
     ) {
-      const { results } = await env.DB.prepare(
-        "SELECT * FROM messages ORDER BY id ASC"
-      ).all();
+      try {
+        const { results } = await env.DB.prepare(
+          "SELECT id, username, message FROM messages ORDER BY id ASC"
+        ).all();
 
-      return new Response(
-        JSON.stringify(results),
-        {
+        return new Response(JSON.stringify(results), {
           headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
           }
-        }
-      );
+        });
+      } catch (error) {
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          { status: 500 }
+        );
+      }
     }
 
     return new Response("Not Found", {
