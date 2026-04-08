@@ -15,33 +15,33 @@ const typingIndicator = document.getElementById('typing-indicator');
 
 // Auto-Scroll helper
 function scrollToBottom() {
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 // Render a single message directly into the DOM
 function renderMessage(docData, docId) {
-    // Prevent duplicate rendering
-    if (document.getElementById(`msg-${docId}`)) return;
+  // Prevent duplicate rendering
+  if (document.getElementById(`msg-${docId}`)) return;
 
-    const { username, message, translated_message, created_at, group_name } = docData;
-    
-    // Safety check - we only render if it belongs to selected group
-    if (group_name !== currentGroupContext) return;
+  const { username, message, translated_message, created_at, group_name } = docData;
 
-    // Use display name or email prefix to match logic in handleSendMessage
-    const safeMyName = currentUser.displayName || currentUser.email.split('@')[0];
-    const isMine = username === safeMyName;
-    
-    let timeString = 'Sending...';
-    if (created_at) {
-        timeString = new Date(created_at).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
-    }
+  // Safety check - we only render if it belongs to selected group
+  if (group_name !== currentGroupContext) return;
 
-    const wrapper = document.createElement('div');
-    wrapper.className = `message-wrapper ${isMine ? 'message-mine' : 'message-yours'}`;
-    wrapper.id = `msg-${docId}`;
+  // Use display name or email prefix to match logic in handleSendMessage
+  const safeMyName = currentUser.displayName || currentUser.email.split('@')[0];
+  const isMine = username === safeMyName;
 
-    let html = `
+  let timeString = 'Sending...';
+  if (created_at) {
+    timeString = new Date(created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  const wrapper = document.createElement('div');
+  wrapper.className = `message-wrapper ${isMine ? 'message-mine' : 'message-yours'}`;
+  wrapper.id = `msg-${docId}`;
+
+  let html = `
         <div class="message-header">
             <span>${isMine ? 'You' : (username || 'User')}</span>
             <span>${timeString}</span>
@@ -50,16 +50,16 @@ function renderMessage(docData, docId) {
             <p>${translated_message || message}</p>
     `;
 
-    // Append Original context if translation occurred explicitly
-    if (translated_message && translated_message !== message) {
-        html += `<div class="translation-box">Original: ${message}</div>`;
-    }
+  // Append Original context if translation occurred explicitly
+  if (translated_message && translated_message !== message) {
+    html += `<div class="translation-box">Original: ${message}</div>`;
+  }
 
-    html += `</div>`;
-    wrapper.innerHTML = html;
-    
-    messagesContainer.appendChild(wrapper);
-    scrollToBottom();
+  html += `</div>`;
+  wrapper.innerHTML = html;
+
+  messagesContainer.appendChild(wrapper);
+  scrollToBottom();
 }
 
 export async function loadMessages() {
@@ -80,31 +80,31 @@ export async function loadMessages() {
 }
 
 export function initializeChat(user) {
-    currentUser = user;
-    
-    messagesContainer.innerHTML = '';
+  currentUser = user;
+
+  messagesContainer.innerHTML = '';
+  loadMessages().then(() => scrollToBottom());
+
+  // Launch polling equivalent mechanism
+  if (pollingInterval) clearInterval(pollingInterval);
+  pollingInterval = setInterval(loadMessages, 3000);
+
+  // Listen for Group change dispatches locally
+  window.addEventListener('groupChanged', (e) => {
+    currentGroupContext = e.detail.group;
+    currentToneContext = e.detail.tone;
+
+    messagesContainer.innerHTML = ''; // Re-render chat area
     loadMessages().then(() => scrollToBottom());
+  });
 
-    // Launch polling equivalent mechanism
-    if (pollingInterval) clearInterval(pollingInterval);
-    pollingInterval = setInterval(loadMessages, 3000); 
-
-    // Listen for Group change dispatches locally
-    window.addEventListener('groupChanged', (e) => {
-        currentGroupContext = e.detail.group;
-        currentToneContext = e.detail.tone;
-        
-        messagesContainer.innerHTML = ''; // Re-render chat area
-        loadMessages().then(() => scrollToBottom());
-    });
-
-    messageForm.removeEventListener('submit', sendMessageWrapper);
-    messageForm.addEventListener('submit', sendMessageWrapper);
+  messageForm.removeEventListener('submit', sendMessageWrapper);
+  messageForm.addEventListener('submit', sendMessageWrapper);
 }
 
 function sendMessageWrapper(e) {
-    if(e) e.preventDefault();
-    sendMessage();
+  if (e) e.preventDefault();
+  sendMessage();
 }
 
 async function sendMessage() {

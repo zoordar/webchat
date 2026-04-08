@@ -1,6 +1,6 @@
 import { setupAuthUI } from './auth.js';
 import { initializeChat } from './chat.js';
-const API_URL = "https://chatterbox-backend.webchatproject.workers.dev";
+const API_URL = "https://chatterbox.webchatproject.workers.dev/";
 
 /*
  * App.js Coordinates standard Frontend interactions that spans beyond just

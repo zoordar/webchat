@@ -1,9 +1,9 @@
 import { auth, googleProvider } from './firebase-config.js';
-import { 
-    signInWithEmailAndPassword, 
-    signInWithPopup, 
-    signOut, 
-    onAuthStateChanged 
+import {
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 export function setupAuthUI(onAuthSuccess, onAuthLogout) {
@@ -14,15 +14,15 @@ export function setupAuthUI(onAuthSuccess, onAuthLogout) {
     }
 
     const errorMsg = document.getElementById('auth-error');
-    
+
     // Login with Email
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
-        
+
         try {
-            await signInWithEmailAndPassword(auth, email, pass);
+            await loginWithEmail(email, pass);
             errorMsg.classList.add('hidden');
         } catch (error) {
             console.error("Auth Error (Email): ", error);
@@ -59,7 +59,7 @@ export function setupAuthUI(onAuthSuccess, onAuthLogout) {
             const fallbackAvatar = `https://ui-avatars.com/api/?name=${user.email}&background=random`;
             document.getElementById('user-name').textContent = user.displayName || user.email.split('@')[0];
             document.getElementById('user-avatar').src = user.photoURL || fallbackAvatar;
-            
+
             // Trigger app state change callback
             onAuthSuccess(user);
         } else {
@@ -67,4 +67,22 @@ export function setupAuthUI(onAuthSuccess, onAuthLogout) {
             onAuthLogout();
         }
     });
+}
+
+export async function loginWithEmail(email, password) {
+  const result = await signInWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
+
+  localStorage.setItem(
+    "user",
+    JSON.stringify({
+      name: result.user.email,
+      uid: result.user.uid
+    })
+  );
+
+  window.location.href = "chat.html";
 }

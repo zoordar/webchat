@@ -29,7 +29,7 @@ export async function translateWithGemini(text, targetLanguage, groupTone, onPro
         }
 
         const data = await response.json();
-        
+
         if (onProgress) onProgress(false);
         return data.translated_message || text;
 
