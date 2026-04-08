@@ -23,13 +23,15 @@ if (userAvatarEl) {
 // ── LOAD MESSAGES ────────────────────────────────────────────
 async function loadMessages() {
   try {
-    const res = await fetch(API_URL + "/get-messages?group=" + currentGroup);
+    const res = await fetch(
+      API_URL + "/get-messages?group=" + encodeURIComponent(currentGroup)
+    );
+
     const data = await res.json();
 
-    console.log("Messages loaded:", data);
+    console.log("Loaded for:", currentGroup, data);
 
     const box = document.getElementById("messages");
-
     box.innerHTML = "";
 
     data.forEach(msg => {
@@ -40,10 +42,8 @@ async function loadMessages() {
         </div>
       `;
     });
-
-    box.scrollTop = box.scrollHeight;
   } catch (error) {
-    console.error("Failed to load messages:", error);
+    console.error("Load error:", error);
   }
 }
 
@@ -56,9 +56,7 @@ window.sendMessage = async function () {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  console.log("Sending message:", message);
-
-  const res = await fetch(API_URL + "/send-message", {
+  await fetch(API_URL + "/send-message", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -69,9 +67,6 @@ window.sendMessage = async function () {
       group_name: currentGroup
     })
   });
-
-  const result = await res.json();
-  console.log(result);
 
   input.value = "";
   loadMessages();
@@ -86,18 +81,23 @@ document.getElementById("messageInput")?.addEventListener("keydown", (e) => {
 });
 
 // ── GROUP SWITCHING ──────────────────────────────────────────
-const groupItems = document.querySelectorAll('.group-item');
-const currentGroupName = document.getElementById('current-group-name');
-const currentGroupTone = document.getElementById('current-group-tone');
+// attach click listeners to all group cards
+document.querySelectorAll(".group-item").forEach(item => {
+  item.addEventListener("click", () => {
+    currentGroup = item.dataset.group;
 
-groupItems.forEach(item => {
-  item.addEventListener('click', () => {
-    groupItems.forEach(g => g.classList.remove('active'));
-    item.classList.add('active');
-    if (currentGroupName) currentGroupName.textContent = item.getAttribute('data-name');
-    if (currentGroupTone) currentGroupTone.textContent = item.getAttribute('data-tone');
-    
-    currentGroup = item.getAttribute('data-name');
+    // update heading text
+    const titleEl = document.getElementById("groupTitle");
+    if(titleEl) titleEl.innerText = currentGroup;
+
+    // active UI highlight
+    document.querySelectorAll(".group-item").forEach(g =>
+      g.classList.remove("active")
+    );
+    item.classList.add("active");
+
+    console.log("Switched group:", currentGroup);
+
     loadMessages();
   });
 });
