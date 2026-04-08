@@ -1,137 +1,114 @@
-import { translateWithGemini, API_BASE_URL } from './gemma-api.js';
+// chat.js — Works with chat.html after login redirect
 
-let currentUser = null;
-let currentGroupContext = 'friends'; // Default Group
-let currentToneContext = 'Casual Tone';
-let pollingInterval = null;
+const API_URL = "https://linguachat-backend.webchatproject.workers.dev";
 
-// UI Elements
-const messagesContainer = document.getElementById('messages-container');
-const messageForm = document.getElementById('message-form');
-const messageInput = document.getElementById('message-input');
-const aiToggle = document.getElementById('ai-translate-toggle');
-const targetLangSelect = document.getElementById('target-language');
-const typingIndicator = document.getElementById('typing-indicator');
-
-// Auto-Scroll helper
-function scrollToBottom() {
-  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+// ── SESSION GUARD: Redirect to login if no user ──────────────
+const storedUser = localStorage.getItem("user");
+if (!storedUser) {
+  console.warn("No session found. Redirecting to login...");
+  window.location.href = "index.html";
 }
 
-// Render a single message directly into the DOM
-function renderMessage(docData, docId) {
-  // Prevent duplicate rendering
-  if (document.getElementById(`msg-${docId}`)) return;
+const currentUser = storedUser ? JSON.parse(storedUser) : { email: "Guest" };
 
-  const { username, message, translated_message, created_at, group_name } = docData;
+// ── DISPLAY USER INFO ────────────────────────────────────────
+const userNameEl = document.getElementById("user-name");
+const userAvatarEl = document.getElementById("user-avatar");
+if (userNameEl) userNameEl.textContent = currentUser.email;
+if (userAvatarEl) {
+  userAvatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.email)}&background=random`;
+}
 
-  // Safety check - we only render if it belongs to selected group
-  if (group_name !== currentGroupContext) return;
+// ── LOAD MESSAGES ────────────────────────────────────────────
+async function loadMessages() {
+  try {
+    const res = await fetch(`${API_URL}/get-messages`);
+    const data = await res.json();
 
-  // Use display name or email prefix to match logic in handleSendMessage
-  const safeMyName = currentUser.displayName || currentUser.email.split('@')[0];
-  const isMine = username === safeMyName;
+    const box = document.getElementById("messages");
+    if (!box) return;
+    box.innerHTML = "";
 
-  let timeString = 'Sending...';
-  if (created_at) {
-    timeString = new Date(created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  const wrapper = document.createElement('div');
-  wrapper.className = `message-wrapper ${isMine ? 'message-mine' : 'message-yours'}`;
-  wrapper.id = `msg-${docId}`;
-
-  let html = `
-        <div class="message-header">
-            <span>${isMine ? 'You' : (username || 'User')}</span>
-            <span>${timeString}</span>
+    data.forEach(msg => {
+      const isMe = msg.username === currentUser.email;
+      box.innerHTML += `
+        <div class="message-wrapper ${isMe ? 'message-mine' : 'message-yours'}">
+          <div class="message-header">
+            <span>${isMe ? 'You' : (msg.username || 'User')}</span>
+          </div>
+          <div class="message-bubble">
+            <p>${msg.message}</p>
+          </div>
         </div>
-        <div class="message-bubble">
-            <p>${translated_message || message}</p>
-    `;
+      `;
+    });
 
-  // Append Original context if translation occurred explicitly
-  if (translated_message && translated_message !== message) {
-    html += `<div class="translation-box">Original: ${message}</div>`;
+    // Auto-scroll to latest
+    box.scrollTop = box.scrollHeight;
+  } catch (err) {
+    console.error("Failed to load messages:", err);
   }
-
-  html += `</div>`;
-  wrapper.innerHTML = html;
-
-  messagesContainer.appendChild(wrapper);
-  scrollToBottom();
 }
 
-export async function loadMessages() {
-  const url = typeof API_URL !== 'undefined' ? API_URL : API_BASE_URL;
-  const res = await fetch(`${url}/get-messages`);
-  const data = await res.json();
-
-  const box = document.getElementById("messages") || document.getElementById("messages-container");
-  box.innerHTML = "";
-
-  data.forEach(msg => {
-    box.innerHTML += `
-      <div class="message">
-        <b>${msg.username}</b>: ${msg.message}
-      </div>
-    `;
-  });
-}
-
-export function initializeChat(user) {
-  currentUser = user;
-
-  messagesContainer.innerHTML = '';
-  loadMessages().then(() => scrollToBottom());
-
-  // Launch polling equivalent mechanism
-  if (pollingInterval) clearInterval(pollingInterval);
-  pollingInterval = setInterval(loadMessages, 3000);
-
-  // Listen for Group change dispatches locally
-  window.addEventListener('groupChanged', (e) => {
-    currentGroupContext = e.detail.group;
-    currentToneContext = e.detail.tone;
-
-    messagesContainer.innerHTML = ''; // Re-render chat area
-    loadMessages().then(() => scrollToBottom());
-  });
-
-  messageForm.removeEventListener('submit', sendMessageWrapper);
-  messageForm.addEventListener('submit', sendMessageWrapper);
-}
-
-function sendMessageWrapper(e) {
-  if (e) e.preventDefault();
-  sendMessage();
-}
-
-async function sendMessage() {
-  const input = document.getElementById("messageInput") || document.getElementById("message-input"); // fallback to current id
+// ── SEND MESSAGE ─────────────────────────────────────────────
+window.sendMessage = async function () {
+  const input = document.getElementById("messageInput");
   const message = input.value.trim();
-
   if (!message) return;
 
-  const user = JSON.parse(localStorage.getItem("user")) || {
-    name: "Guest"
-  };
+  try {
+    await fetch(`${API_URL}/send-message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: currentUser.email,
+        message: message
+      })
+    });
 
-  const url = typeof API_URL !== 'undefined' ? API_URL : API_BASE_URL;
+    input.value = "";
+    loadMessages();
+  } catch (err) {
+    console.error("Failed to send message:", err);
+  }
+};
 
-  await fetch(`${url}/send-message`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      username: user.name,
-      message: message
-    })
+// ── SEND ON ENTER KEY ────────────────────────────────────────
+document.getElementById("messageInput")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    window.sendMessage();
+  }
+});
+
+// ── GROUP SWITCHING ──────────────────────────────────────────
+const groupItems = document.querySelectorAll('.group-item');
+const currentGroupName = document.getElementById('current-group-name');
+const currentGroupTone = document.getElementById('current-group-tone');
+
+groupItems.forEach(item => {
+  item.addEventListener('click', () => {
+    groupItems.forEach(g => g.classList.remove('active'));
+    item.classList.add('active');
+    if (currentGroupName) currentGroupName.textContent = item.getAttribute('data-name');
+    if (currentGroupTone) currentGroupTone.textContent = item.getAttribute('data-tone');
+    loadMessages();
   });
+});
 
-  input.value = "";
-  loadMessages();
-}
+// ── THEME TOGGLE ─────────────────────────────────────────────
+document.getElementById('theme-toggle')?.addEventListener('click', () => {
+  const isDark = document.body.classList.toggle('dark-mode');
+  const icon = document.getElementById('theme-icon');
+  if (icon) icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+});
 
+// ── LOGOUT ───────────────────────────────────────────────────
+window.logoutUser = function () {
+  localStorage.removeItem("user");
+  window.location.href = "index.html";
+};
+
+// ── POLL FOR NEW MESSAGES ────────────────────────────────────
+loadMessages();
 setInterval(loadMessages, 2000);

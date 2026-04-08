@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatterbox AI - Chat</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="dark-mode">
+
+  <div id="chat-section" class="glass-panel flex-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>Groups</h2>
+      </div>
+      <ul class="group-list" id="group-list">
+        <li class="group-item active" data-type="friends" data-name="Friends" data-tone="Casual Tone">
+          <div class="emoji-container">🍕</div>
+          <div class="group-info">
+            <h3>Friends</h3>
+            <p>Casual Tone</p>
+          </div>
+        </li>
+        <li class="group-item" data-type="study" data-name="Study Group" data-tone="Formal Tone">
+          <div class="emoji-container">📚</div>
+          <div class="group-info">
+            <h3>Study Group</h3>
+            <p>Formal Tone</p>
+          </div>
+        </li>
+        <li class="group-item" data-type="office" data-name="Office" data-tone="Professional Tone">
+          <div class="emoji-container">💼</div>
+          <div class="group-info">
+            <h3>Office</h3>
+            <p>Professional Tone</p>
+          </div>
+        </li>
+        <li class="group-item" data-type="family" data-name="Family" data-tone="Warm Tone">
+          <div class="emoji-container">🏠</div>
+          <div class="group-info">
+            <h3>Family</h3>
+            <p>Warm Tone</p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <img src="https://ui-avatars.com/api/?name=User&background=random" alt="User" id="user-avatar" class="avatar default-avatar">
+          <div class="user-details">
+            <span id="user-name">Loading...</span>
+          </div>
+        </div>
+        <button id="logout-btn" class="icon-btn" title="Logout" onclick="logoutUser()">
+          <span class="material-icons">logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="chat-area">
+      <header class="chat-header">
+        <div class="current-group">
+          <h2 id="current-group-name">Friends</h2>
+          <span id="current-group-tone" class="badge">Casual Tone</span>
+        </div>
+        <div class="header-actions">
+          <button id="theme-toggle" class="icon-btn" title="Toggle Theme">
+            <span class="material-icons" id="theme-icon">light_mode</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="messages-container" id="messages"></div>
+
+      <footer class="chat-input-area">
+        <form id="message-form" onsubmit="event.preventDefault();">
+          <div class="input-wrapper">
+            <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off">
+          </div>
+          <button type="button" id="send-btn" class="icon-btn primary-icon-btn glow-effect" onclick="sendMessage()">
+            <span class="material-icons">send</span>
+          </button>
+        </form>
+      </footer>
+    </main>
+  </div>
+
+  <script type="module" src="chat.js"></script>
+</body>
+</html>
