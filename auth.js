@@ -1,10 +1,10 @@
 import { auth } from "./firebase-config.js";
 import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
+    GoogleAuthProvider,
+    signInWithPopup,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 export function setupAuthUI(onAuthSuccess, onAuthLogout) {
@@ -72,19 +72,19 @@ export function setupAuthUI(onAuthSuccess, onAuthLogout) {
 }
 
 export async function loginWithEmail(email, password) {
-  const result = await signInWithEmailAndPassword(
-    auth,
-    email,
-    password
-  );
+    const result = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+    );
 
-  localStorage.setItem(
-    "user",
-    JSON.stringify({
-      name: result.user.email,
-      uid: result.user.uid
-    })
-  );
+    localStorage.setItem(
+        "user",
+        JSON.stringify({
+            name: result.user.email,
+            uid: result.user.uid
+        })
+    );
 
-  window.location.href = "chat.html";
+    window.location.href = "chat.html";
 }
