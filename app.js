@@ -1,4 +1,3 @@
-import { setupAuthUI } from './auth.js';
 import { initializeChat } from './chat.js';
 const API_URL = "https://chatterbox.webchatproject.workers.dev/";
 
@@ -80,7 +79,4 @@ document.querySelector('.emoji-btn')?.addEventListener('click', (e) => {
     messageInput.focus();
 });
 
-// Run Setup at Boot!
-document.addEventListener('DOMContentLoaded', () => {
-    setupAuthUI(handleAuthSuccess, handleAuthLogout);
-});
+

@@ -165,7 +165,9 @@
         </div>
     </div>
 
-    <!-- Application Logic (ES Modules) -->
+    <!-- Authentication (loaded first so window.loginWithEmail is available) -->
+    <script type="module" src="auth.js"></script>
+    <!-- Application Logic -->
     <script type="module" src="app.js"></script>
 </body>
 
