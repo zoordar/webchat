@@ -1,6 +1,6 @@
 // chat.js — Works with chat.html after login redirect
 
-const API_URL = "https://chatterbox.webchatproject.workers.dev";
+const API_URL = "https://chatterbox-backend.webchatproject.workers.dev";
 
 // ── SESSION GUARD: Redirect to login if no user ──────────────
 const storedUser = localStorage.getItem("user");
@@ -25,16 +25,22 @@ async function loadMessages() {
     const res = await fetch(API_URL + "/get-messages");
     const data = await res.json();
 
+    console.log("Messages loaded:", data);
+
     const box = document.getElementById("messages");
+
     box.innerHTML = "";
 
     data.forEach(msg => {
       box.innerHTML += `
-        <div class="message">
-          <b>${msg.username}</b>: ${msg.message}
+        <div class="message-bubble">
+          <strong>${msg.username}</strong><br>
+          ${msg.message}
         </div>
       `;
     });
+
+    box.scrollTop = box.scrollHeight;
   } catch (error) {
     console.error("Failed to load messages:", error);
   }
