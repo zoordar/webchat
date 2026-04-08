@@ -51,20 +51,29 @@ export default {
       url.pathname === "/get-messages" &&
       request.method === "GET"
     ) {
-      const group = url.searchParams.get("group");
+      try {
+        const group = url.searchParams.get("group");
 
-      const { results } = await env.DB.prepare(
-        "SELECT * FROM messages WHERE group_name = ? ORDER BY id ASC"
-      )
-        .bind(group)
-        .all();
+        console.log("Fetching group:", group);
 
-      return new Response(JSON.stringify(results), {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        }
-      });
+        const { results } = await env.DB.prepare(
+          "SELECT id, username, message, group_name FROM messages WHERE group_name = ? ORDER BY id ASC"
+        )
+          .bind(group)
+          .all();
+
+        return new Response(JSON.stringify(results), {
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          }
+        });
+      } catch (error) {
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          { status: 500 }
+        );
+      }
     }
 
     return new Response("Not Found", {
