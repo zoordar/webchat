@@ -22,15 +22,15 @@ export default {
       try {
         const body = await request.json();
 
-        console.log("Received:", body);
+        console.log("BODY RECEIVED:", body);
 
         await env.DB.prepare(
-          "INSERT INTO messages (username, message, group_name) VALUES (?, ?, ?)"
+          "INSERT INTO messages (username, group_name, message) VALUES (?, ?, ?)"
         )
           .bind(
             body.username,
-            body.message,
-            body.group_name
+            body.group_name,
+            body.message
           )
           .run();
 

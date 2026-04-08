@@ -56,24 +56,20 @@ window.sendMessage = async function () {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  console.log("Sending to group:", currentGroup);
-
-  console.log({
+  const payload = {
     username: user.email,
     message: message,
     group_name: currentGroup
-  });
+  };
+
+  console.log("PAYLOAD:", payload);
 
   await fetch(API_URL + "/send-message", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      username: user.email,
-      message: message,
-      group_name: currentGroup
-    })
+    body: JSON.stringify(payload)
   });
 
   input.value = "";
