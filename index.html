@@ -40,12 +40,12 @@
                         <input type="password" id="password" placeholder="Password" required>
                     </div>
                     <p id="auth-error" class="error-msg hidden"></p>
-                    <button type="submit" class="btn primary-btn">Login with Email</button>
+                    <button type="submit" class="btn primary-btn" onclick="event.preventDefault(); loginWithEmail();">Login with Email</button>
                 </form>
 
                 <div class="divider"><span>OR</span></div>
 
-                <button id="google-login-btn" class="btn google-btn">
+                <button id="google-login-btn" class="btn google-btn" onclick="loginWithGoogle()">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google"
                         class="google-logo">
                     Continue with Google
