@@ -1,6 +1,6 @@
 // chat.js — Works with chat.html after login redirect
 
-const API_URL = "https://linguachat-backend.webchatproject.workers.dev";
+const API_URL = "https://chatterbox.webchatproject.workers.dev/";
 
 // ── SESSION GUARD: Redirect to login if no user ──────────────
 const storedUser = localStorage.getItem("user");
@@ -54,23 +54,32 @@ async function loadMessages() {
 window.sendMessage = async function () {
   const input = document.getElementById("messageInput");
   const message = input.value.trim();
+
   if (!message) return;
 
-  try {
-    await fetch(`${API_URL}/send-message`, {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  console.log("Sending message:", message);
+
+  const response = await fetch(
+    `${API_URL}/send-message`,
+    {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
-        username: currentUser.email,
+        username: user.email,
         message: message
       })
-    });
+    }
+  );
 
-    input.value = "";
-    loadMessages();
-  } catch (err) {
-    console.error("Failed to send message:", err);
-  }
+  const result = await response.json();
+  console.log("Worker response:", result);
+
+  input.value = "";
+  loadMessages();
 };
 
 // ── SEND ON ENTER KEY ────────────────────────────────────────

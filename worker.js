@@ -20,23 +20,24 @@ export default {
       request.method === "POST"
     ) {
       try {
-        const { username, message } =
-          await request.json();
+        const body = await request.json();
+        console.log(body);
 
         await env.DB.prepare(
           "INSERT INTO messages (username, message) VALUES (?, ?)"
         )
-          .bind(username, message)
+          .bind(body.username, body.message)
           .run();
 
         return new Response(
           JSON.stringify({
-            success: true
+            success: true,
+            inserted: body
           }),
           {
             headers: {
-              ...corsHeaders,
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*"
             }
           }
         );
@@ -45,10 +46,7 @@ export default {
           JSON.stringify({
             error: error.message
           }),
-          {
-            status: 500,
-            headers: corsHeaders
-          }
+          { status: 500 }
         );
       }
     }
