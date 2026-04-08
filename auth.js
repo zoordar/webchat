@@ -1,10 +1,11 @@
-import { auth, googleProvider } from './firebase-config.js';
+import { auth } from "./firebase-config.js";
 import {
-    signInWithEmailAndPassword,
-    signInWithPopup,
-    signOut,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 export function setupAuthUI(onAuthSuccess, onAuthLogout) {
     if (!auth) {
@@ -34,6 +35,7 @@ export function setupAuthUI(onAuthSuccess, onAuthLogout) {
     // Login with Google
     document.getElementById('google-login-btn').addEventListener('click', async () => {
         try {
+            const googleProvider = new GoogleAuthProvider();
             await signInWithPopup(auth, googleProvider);
             errorMsg.classList.add('hidden');
         } catch (error) {
