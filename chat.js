@@ -1,6 +1,6 @@
 // chat.js — Works with chat.html after login redirect
 
-const API_URL = "https://chatterbox.webchatproject.workers.dev/";
+const API_URL = "https://chatterbox.webchatproject.workers.dev";
 
 // ── SESSION GUARD: Redirect to login if no user ──────────────
 const storedUser = localStorage.getItem("user");
@@ -22,31 +22,21 @@ if (userAvatarEl) {
 // ── LOAD MESSAGES ────────────────────────────────────────────
 async function loadMessages() {
   try {
-    const res = await fetch(`${API_URL}/get-messages`);
+    const res = await fetch(API_URL + "/get-messages");
     const data = await res.json();
 
     const box = document.getElementById("messages");
-    if (!box) return;
     box.innerHTML = "";
 
     data.forEach(msg => {
-      const isMe = msg.username === currentUser.email;
       box.innerHTML += `
-        <div class="message-wrapper ${isMe ? 'message-mine' : 'message-yours'}">
-          <div class="message-header">
-            <span>${isMe ? 'You' : (msg.username || 'User')}</span>
-          </div>
-          <div class="message-bubble">
-            <p>${msg.message}</p>
-          </div>
+        <div class="message">
+          <b>${msg.username}</b>: ${msg.message}
         </div>
       `;
     });
-
-    // Auto-scroll to latest
-    box.scrollTop = box.scrollHeight;
-  } catch (err) {
-    console.error("Failed to load messages:", err);
+  } catch (error) {
+    console.error("Failed to load messages:", error);
   }
 }
 
@@ -61,22 +51,19 @@ window.sendMessage = async function () {
 
   console.log("Sending message:", message);
 
-  const response = await fetch(
-    `${API_URL}/send-message`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        username: user.email,
-        message: message
-      })
-    }
-  );
+  const res = await fetch(API_URL + "/send-message", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      username: user.email,
+      message: message
+    })
+  });
 
-  const result = await response.json();
-  console.log("Worker response:", result);
+  const result = await res.json();
+  console.log(result);
 
   input.value = "";
   loadMessages();
