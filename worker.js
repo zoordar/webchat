@@ -20,12 +20,13 @@ export default {
       request.method === "POST"
     ) {
       try {
-        const { username, message } = await request.json();
+        const { username, message, group_name } =
+          await request.json();
 
         await env.DB.prepare(
-          "INSERT INTO messages (username, message) VALUES (?, ?)"
+          "INSERT INTO messages (username, message, group_name) VALUES (?, ?, ?)"
         )
-          .bind(username, message)
+          .bind(username, message, group_name)
           .run();
 
         return new Response(
@@ -50,23 +51,20 @@ export default {
       url.pathname === "/get-messages" &&
       request.method === "GET"
     ) {
-      try {
-        const { results } = await env.DB.prepare(
-          "SELECT id, username, message FROM messages ORDER BY id ASC"
-        ).all();
+      const group = url.searchParams.get("group");
 
-        return new Response(JSON.stringify(results), {
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-          }
-        });
-      } catch (error) {
-        return new Response(
-          JSON.stringify({ error: error.message }),
-          { status: 500 }
-        );
-      }
+      const { results } = await env.DB.prepare(
+        "SELECT * FROM messages WHERE group_name = ? ORDER BY id ASC"
+      )
+        .bind(group)
+        .all();
+
+      return new Response(JSON.stringify(results), {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        }
+      });
     }
 
     return new Response("Not Found", {

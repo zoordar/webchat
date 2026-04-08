@@ -1,6 +1,7 @@
 // chat.js — Works with chat.html after login redirect
 
 const API_URL = "https://chatterbox-backend.webchatproject.workers.dev";
+let currentGroup = "Office";
 
 // ── SESSION GUARD: Redirect to login if no user ──────────────
 const storedUser = localStorage.getItem("user");
@@ -22,7 +23,7 @@ if (userAvatarEl) {
 // ── LOAD MESSAGES ────────────────────────────────────────────
 async function loadMessages() {
   try {
-    const res = await fetch(API_URL + "/get-messages");
+    const res = await fetch(API_URL + "/get-messages?group=" + currentGroup);
     const data = await res.json();
 
     console.log("Messages loaded:", data);
@@ -64,7 +65,8 @@ window.sendMessage = async function () {
     },
     body: JSON.stringify({
       username: user.email,
-      message: message
+      message: message,
+      group_name: currentGroup
     })
   });
 
@@ -94,6 +96,8 @@ groupItems.forEach(item => {
     item.classList.add('active');
     if (currentGroupName) currentGroupName.textContent = item.getAttribute('data-name');
     if (currentGroupTone) currentGroupTone.textContent = item.getAttribute('data-tone');
+    
+    currentGroup = item.getAttribute('data-name');
     loadMessages();
   });
 });
