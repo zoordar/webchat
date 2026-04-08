@@ -20,13 +20,18 @@ export default {
       request.method === "POST"
     ) {
       try {
-        const { username, message, group_name } =
-          await request.json();
+        const body = await request.json();
+
+        console.log("Received:", body);
 
         await env.DB.prepare(
           "INSERT INTO messages (username, message, group_name) VALUES (?, ?, ?)"
         )
-          .bind(username, message, group_name)
+          .bind(
+            body.username,
+            body.message,
+            body.group_name
+          )
           .run();
 
         return new Response(

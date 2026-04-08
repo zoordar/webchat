@@ -56,6 +56,14 @@ window.sendMessage = async function () {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
+  console.log("Sending to group:", currentGroup);
+
+  console.log({
+    username: user.email,
+    message: message,
+    group_name: currentGroup
+  });
+
   await fetch(API_URL + "/send-message", {
     method: "POST",
     headers: {
