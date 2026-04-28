@@ -1,10 +1,7 @@
 import { initializeChat } from './chat.js';
 const API_URL = "https://chatterbox.webchatproject.workers.dev/";
 
-/*
- * App.js Coordinates standard Frontend interactions that spans beyond just
- * Authentication or isolated Chat operations.
- */
+
 
 // Global DOM Cache
 const authSection = document.getElementById('auth-section');
@@ -36,7 +33,7 @@ function handleAuthLogout() {
     document.getElementById('login-form').reset();
 }
 
-// Enable beautiful Dark/Light transition
+// Enable Dark/Light transition
 themeToggleBtn.addEventListener('click', () => {
     const isDark = document.body.classList.toggle('dark-mode');
 

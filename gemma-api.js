@@ -1,13 +1,7 @@
-/* 
- * ========================================================
- * CONFIG: Set your Cloudflare Worker URL here once deployed.
- * ========================================================
- */
+
 export const API_BASE_URL = "http://127.0.0.1:8787"; // Change to your active Worker Route later
 
-/**
- * Uses Cloudflare Worker to process the Gemini AI translation
- */
+
 export async function translateWithGemini(text, targetLanguage, groupTone, onProgress = null) {
     if (onProgress) onProgress(true);
 
